@@ -62,7 +62,7 @@ class PasswordRecord:
 
 def read_input_files(input_file: str) -> list[PasswordRecord]:
     """
-    Extracts a list of expenses from the input file.
+    Extracts a list of password records from the input file.
     """
     with open(input_file) as input_fobj:
         records = [PasswordRecord.parse(line.strip()) for line in input_fobj]
