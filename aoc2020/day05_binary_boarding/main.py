@@ -16,7 +16,7 @@ def main():
     print(p1_answer)
 
     # Part 2: find missing seat
-    p2_answer = find_missing_seat(seats)
+    p2_answer = find_missing_seat_id(seats)
     print(p2_answer)
 
 
@@ -35,15 +35,17 @@ class Seat:
         return Seat(row=int(code[:7], 2), col=int(code[7:], 2))
 
 
-def find_missing_seat(seats: list[Seat]) -> int:
+def find_missing_seat_id(seats: list[Seat]) -> int:
     """
     Find the missing seat in a cheating way
     by exploiting the cross-checking method (see problem statement).
     """
-    min_id = min(s.seat_id for s in seats)
-    max_id = max(s.seat_id for s in seats)
-    answer = sum(range(min_id, max_id + 1)) - sum(s.seat_id for s in seats)
-    return answer
+    seat_ids = [s.seat_id for s in seats]
+    reserved_ids = set(range(min(seat_ids), max(seat_ids) + 1))
+    occupied_ids = set(seat_ids)
+    vacant_ids = reserved_ids - occupied_ids
+    assert len(vacant_ids) == 1
+    return vacant_ids.pop()
 
 
 def read_input_files(input_file: str) -> list[Seat]:
