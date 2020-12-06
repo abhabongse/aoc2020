@@ -15,7 +15,7 @@ def main():
     # Part 1: Count yes-answers across groups assuming that
     # a group answers YES to a particular question
     # if at least one person in the group does.
-    p1_answer = sum(any_answered_yes(s) for s in surveys)
+    p1_answer = sum(any_answering_yes(s) for s in surveys)
     print(p1_answer)
 
     # Part 2: Count yes-answers across groups assuming that
@@ -25,7 +25,7 @@ def main():
     print(p2_answer)
 
 
-def any_answered_yes(survey: list[str]) -> int:
+def any_answering_yes(survey: list[str]) -> int:
     """
     Counts the number of A-Z questions where at least one person
     in the survey group answered yes.
@@ -37,7 +37,7 @@ def any_answered_yes(survey: list[str]) -> int:
 
 def all_answering_yes(survey: list[str]) -> int:
     """
-    Counts the number of A-Z questions where at every person
+    Counts the number of A-Z questions where every person
     in the survey group answered yes.
     """
     set_intersect_op = operator.and_
