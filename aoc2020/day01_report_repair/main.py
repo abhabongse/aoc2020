@@ -5,16 +5,18 @@ import itertools
 import os
 
 
-def solve_p1(input_file: str) -> int:
+def main():
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    input_file = os.path.join(this_dir, 'input.txt')
     expenses = read_input_files(input_file)
+
+    # Part 1
     p1_answer = product_of_constrained_sum(expenses, target=2020, r=2)
-    return p1_answer
+    print(p1_answer)
 
-
-def solve_p2(input_file: str) -> int:
-    expenses = read_input_files(input_file)
+    # Part 2
     p2_answer = product_of_constrained_sum(expenses, target=2020, r=3)
-    return p2_answer
+    print(p2_answer)
 
 
 def product_of_constrained_sum(expenses: list[int], target: int, r: int = 2) -> int:
@@ -36,13 +38,6 @@ def read_input_files(input_file: str) -> list[int]:
     with open(input_file) as input_fobj:
         expenses = [int(line) for line in input_fobj]
     return expenses
-
-
-def main():
-    this_dir = os.path.dirname(os.path.abspath(__file__))
-    input_file = os.path.join(this_dir, 'input.txt')
-    print(solve_p1(input_file))
-    print(solve_p2(input_file))
 
 
 if __name__ == '__main__':

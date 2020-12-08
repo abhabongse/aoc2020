@@ -1,0 +1,9 @@
+program_file: main.py
+solvers:
+  p1: product_of_constrained_sum(read_input_files(input_file), target=2020, r=2)
+  p2: product_of_constrained_sum(read_input_files(input_file), target=2020, r=3)
+tests:
+  - input_file: sample.txt
+    solutions:
+      p1: 514579
+      p2: 241861950

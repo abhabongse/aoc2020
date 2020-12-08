@@ -1,49 +1,50 @@
 from __future__ import annotations
 
 import glob
-import importlib.util
 import os
+import runpy
+from collections.abc import Iterator
+from typing import Any
 
 import pytest
+import yaml
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def crawl_tests() -> list[pytest.mark.ParameterSet]:
-    test_cases = [
-        create_test(problem_dir, part_no, solution_file)
-        for problem_dir in sorted(glob.glob(os.path.join(THIS_DIR, '*')))
-        for part_no in [1, 2]
-        for solution_file in glob.iglob(os.path.join(problem_dir, f'*.p{part_no}.sol'))
+    """
+    Looks for tests.yaml file in each problem subdirectory
+    and create a list of test cases base on its content.
+    """
+    tests = [
+        test
+        for test_config_file in sorted(glob.glob(os.path.join(THIS_DIR, '*', 'tests.yaml')))
+        for test in extract_tests_from_config(test_config_file)
     ]
-    return test_cases
+    return tests
 
 
-def create_test(problem_dir: str, part_no: int, solution_file: str) -> pytest.mark.ParameterSet:
+def extract_tests_from_config(test_config_file: str) -> Iterator[pytest.mark.ParameterSet]:
+    problem_dir = os.path.dirname(test_config_file)
     problem_name = os.path.basename(problem_dir)
-    solution_basename = os.path.relpath(solution_file, start=problem_dir)
-    file_stem = solution_basename.removesuffix(f'.p{part_no}.sol')
-    test_id = f'{problem_name}/{solution_basename}'
-    return pytest.param(problem_name, file_stem, part_no, id=test_id)
+    with open(test_config_file) as fobj:
+        config = yaml.safe_load(fobj)
+    program_file = os.path.join(problem_dir, config['program_file'])
+    for test in config['tests']:
+        input_file = os.path.join(problem_dir, test['input_file'])
+        input_name = os.path.join(problem_name, test['input_file'])
+        for part, solution in test['solutions'].items():
+            try:
+                solver = config['solvers'][part]
+            except KeyError as exc:
+                raise Exception(f'missing solver in config: {part}') from exc
+            yield pytest.param(program_file, solver, input_file, solution, id=f"{input_name}::{part}")
 
 
-@pytest.mark.parametrize("problem_name,file_stem,part_no", crawl_tests())
-def test_from_file(problem_name: str, file_stem: str, part_no: int):
-    problem_dir = os.path.join(THIS_DIR, problem_name)
-
-    # Pre-load content of the solution file
-    solution_file = os.path.join(problem_dir, f"{file_stem}.p{part_no}.sol")
-    with open(solution_file) as fobj:
-        solution = fobj.read().strip()
-
-    # Load module and fetch relevant function to test
-    program_file = os.path.join(problem_dir, 'main.py')
-    spec = importlib.util.spec_from_file_location(problem_name, program_file)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    func = getattr(module, f"solve_p{part_no}")
-
-    # Run the function with the input file and compare against solution
-    input_file = os.path.join(problem_dir, f'{file_stem}.txt')
-    answer = func(input_file)
-    assert str(answer) == solution
+@pytest.mark.parametrize("program_file,solver,input_file,solution", crawl_tests())
+def test_from_file(program_file: str, solver: str, input_file: str, solution: Any):
+    module = runpy.run_path(program_file)
+    namespace = module | dict(input_file=input_file)
+    answer = eval(solver, namespace)
+    assert answer == solution
