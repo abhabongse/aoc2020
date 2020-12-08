@@ -9,16 +9,14 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     expenses = read_input_files(input_file)
-    print(solve_p1(expenses))
-    print(solve_p2(expenses))
 
+    # Part 1
+    p1_answer = product_of_constrained_sum(expenses, target=2020, r=2)
+    print(p1_answer)
 
-def solve_p1(expenses: list[int]) -> int:
-    return product_of_constrained_sum(expenses, target=2020, r=2)
-
-
-def solve_p2(expenses: list[int]) -> int:
-    return product_of_constrained_sum(expenses, target=2020, r=3)
+    # Part 2
+    p2_answer = product_of_constrained_sum(expenses, target=2020, r=3)
+    print(p2_answer)
 
 
 def product_of_constrained_sum(expenses: list[int], target: int, r: int = 2) -> int:

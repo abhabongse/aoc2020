@@ -9,21 +9,12 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     area = read_input_files(input_file)
-    print(solve_p1(area))
-    print(solve_p2(area))
 
+    # Part 1: count tress along sloped path
+    p1_answer = count_trees_in_slope(area, dr=1, dc=3)
+    print(p1_answer)
 
-def solve_p1(area: list[str]) -> int:
-    """
-    Count trees along a sloped path.
-    """
-    return count_trees_in_slope(area, dr=1, dc=3)
-
-
-def solve_p2(area: list[str]) -> int:
-    """
-    Product of tree counts along different slopes.
-    """
+    # Part 2: product of tree counts along different slopes
     tree_counts = [
         count_trees_in_slope(area, dr=1, dc=1),
         count_trees_in_slope(area, dr=1, dc=3),
@@ -31,8 +22,8 @@ def solve_p2(area: list[str]) -> int:
         count_trees_in_slope(area, dr=1, dc=7),
         count_trees_in_slope(area, dr=2, dc=1),
     ]
-    product = functools.reduce(lambda x, y: x * y, tree_counts)
-    return product
+    p2_answer = functools.reduce(lambda x, y: x * y, tree_counts)
+    print(tree_counts, p2_answer)
 
 
 def count_trees_in_slope(area: list[str], dr: int, dc: int) -> int:

@@ -11,24 +11,18 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     surveys = read_input_files(input_file)
-    print(solve_p1(surveys))
-    print(solve_p2(surveys))
 
+    # Part 1: Count yes-answers across groups assuming that
+    # a group answers YES to a particular question
+    # if at least one person in the group does.
+    p1_answer = sum(any_answering_yes(s) for s in surveys)
+    print(p1_answer)
 
-def solve_p1(surveys: list[list[str]]) -> int:
-    """
-    Count yes-answers across groups assuming that a group answers YES
-    to a particular question if AT LEAST ONE person in the group does.
-    """
-    return sum(any_answering_yes(s) for s in surveys)
-
-
-def solve_p2(surveys: list[list[str]]) -> int:
-    """
-    Count yes-answers across groups assuming that a group answers YES
-    to a particular question if EVERY person unanimously answers YES.
-    """
-    return sum(all_answering_yes(s) for s in surveys)
+    # Part 2: Count yes-answers across groups assuming that
+    # a group answers YES to a particular question
+    # if every person unanimously answers YES.
+    p2_answer = sum(all_answering_yes(s) for s in surveys)
+    print(p2_answer)
 
 
 def any_answering_yes(survey: list[str]) -> int:
