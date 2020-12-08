@@ -11,14 +11,22 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     records = read_input_files(input_file)
+    print(solve_p1(records))
+    print(solve_p2(records))
 
-    # Part 1: valid passwords under old policy
-    p1_answer = sum(r.is_valid_old for r in records)
-    print(p1_answer)
 
-    # Part 2: valid passwords under new policy
-    p1_answer = sum(r.is_valid_new for r in records)
-    print(p1_answer)
+def solve_p1(records: list[PasswordRecord]) -> int:
+    """
+    Validates passwords under old policy.
+    """
+    return sum(r.is_valid_old for r in records)
+
+
+def solve_p2(records: list[PasswordRecord]) -> int:
+    """
+    Validates passwords under new policy.
+    """
+    return sum(r.is_valid_new for r in records)
 
 
 @dataclass

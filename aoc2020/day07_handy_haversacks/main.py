@@ -15,14 +15,22 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     rules = read_input_files(input_file)
+    print(solve_p1(rules))
+    print(solve_p2(rules))
 
-    # Part 1: count the number of bag colors that may enclose the shiny gold one
-    p1_answer = count_enclosing_bags(rules, central_color='shiny gold')
-    print(p1_answer)
 
-    # Part 2: count the number of bags within a shiny gold bag
-    p2_answer = count_containing_bags(rules, central_color='shiny gold')
-    print(p2_answer)
+def solve_p1(rules: Rules) -> int:
+    """
+    Count the number of bag colors that may enclose the shiny gold one.
+    """
+    return count_enclosing_bags(rules, central_color='shiny gold')
+
+
+def solve_p2(rules: Rules) -> int:
+    """
+    Count the number of bags within a shiny gold bag.
+    """
+    return count_containing_bags(rules, central_color='shiny gold')
 
 
 def count_enclosing_bags(rules: Rules, central_color: str) -> int:

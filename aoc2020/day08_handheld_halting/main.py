@@ -12,17 +12,26 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     program = read_input_files(input_file)
+    print(solve_p1(program))
+    print(solve_p2(program))
 
-    # Part 1: find the accm value right before the first repeat of the same instruction
+
+def solve_p1(program: list[Instruction]) -> int:
+    """
+    Computes the accumulated value right before the first repeat of the same instruction.
+    """
     runner = Runner(program)
     try:
         runner.run()
     except InfiniteLoop:
         pass
-    p1_answer = runner.accm
-    print(p1_answer)
+    return runner.accm
 
-    # Part 2: attempts to fix a single jmp <-> nop mutation and run program until the end
+
+def solve_p2(program: list[Instruction]) -> int:
+    """
+    Attempts to fix a single jmp <-> nop mutation and run program until the end.
+    """
     p2_possible_answers = []
     for altered_program in generate_mutated_programs(program):
         runner = Runner(altered_program)
@@ -32,7 +41,8 @@ def main():
             pass
         else:
             p2_possible_answers.append(runner.accm)
-    print(p2_possible_answers)
+    assert len(p2_possible_answers) == 1
+    return p2_possible_answers[0]
 
 
 @dataclass

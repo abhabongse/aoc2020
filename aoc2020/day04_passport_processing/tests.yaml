@@ -5,5 +5,7 @@ solvers:
 tests:
   - input_file: sample.txt
     solutions:
-      p1: 514579
-      p2: 241861950
+      p1: 2
+  - input_file: another_sample.txt
+    solutions:
+      p2: 4

@@ -25,14 +25,22 @@ def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(this_dir, 'input.txt')
     passports = read_input_files(input_file)
+    print(solve_p1(passports))
+    print(solve_p2(passports))
 
-    # Part 1: count passports with required fields presented
-    p1_answer = sum(all_required_fields_present(p) for p in passports)
-    print(p1_answer)
 
-    # Part 2: count passports with required fields valid
-    p2_answer = sum(all_required_fields_valid(p) for p in passports)
-    print(p2_answer)
+def solve_p1(passports: list[dict]) -> int:
+    """
+    Count passports with required fields presented.
+    """
+    return sum(all_required_fields_present(p) for p in passports)
+
+
+def solve_p2(passports: list[dict]) -> int:
+    """
+    Count passports with required fields presented and valid.
+    """
+    return sum(all_required_fields_valid(p) for p in passports)
 
 
 def all_required_fields_present(passport: dict) -> bool:
