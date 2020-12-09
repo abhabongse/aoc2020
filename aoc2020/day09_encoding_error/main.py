@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import itertools
+import collections
 import os
-import re
-from collections.abc import Iterator
+from collections.abc import Sequence
 
 import more_itertools
-
-INSTR_RE = re.compile(r'(?P<name>\w+) (?P<arg>[-+]\d+)')
 
 
 def main():
@@ -16,7 +13,7 @@ def main():
     numbers = read_input_files(input_file)
 
     # Part 1: find the first corruption in radio transmission
-    p1_answer = find_first_corrupt(numbers, preamble_size=25)
+    p1_answer = find_first_corrupt(numbers, window_size=25)
     print(p1_answer)
 
     # Part 2: find the encryption weakness
@@ -24,25 +21,56 @@ def main():
     print(p2_answer)
 
 
-def find_first_corrupt(numbers: list[int], preamble_size: int) -> int:
-    for index, value in enumerate(numbers[preamble_size:], start=preamble_size):
-        preceding_numbers = numbers[index - preamble_size:index]
-        sums_of_pairs = set(generate_sums_of_pairs(preceding_numbers))
-        if value not in sums_of_pairs:
-            return value
+def find_first_corrupt(numbers: list[int], window_size: int) -> int:
+    """
+    Finds the first corrupt number in O(nm log m) running time, where:
+    - n: size of the input list of numbers
+    - m: window size
+    """
+    for window_plus_one in more_itertools.windowed(numbers, window_size + 1):
+        preceding_numbers = window_plus_one[:-1]
+        target = window_plus_one[-1]
+        if not pair_with_target_sum(preceding_numbers, target):
+            return target
     raise RuntimeError('cannot find a candidate')
+
+
+def pair_with_target_sum(numbers: Sequence[int], target: int) -> bool:
+    """
+    Determines whether there are two elements in the given list of numbers
+    whose sum matches the given target.
+    This function implements what is called two-pointers technique:
+    1. Sort the list of numbers
+    2. Consider a pair of points pointing to two numbers starting at each end of the list
+    3. Move one of the pointers towards each other to adjust their sum to match the target
+    """
+    numbers = sorted(numbers)
+    lo, hi = 0, len(numbers) - 1
+    while lo < hi:
+        if numbers[lo] + numbers[hi] < target:
+            lo += 1
+        elif numbers[lo] + numbers[hi] > target:
+            hi -= 1
+        else:
+            return True
+    return False
 
 
 def find_encryption_weakness(numbers: list[int], target: int) -> int:
-    for sublist in more_itertools.substrings(numbers):
-        if len(sublist) >= 2 and sum(sublist) == target:
-            return min(sublist) + max(sublist)
+    """
+    Finds the encryption weakness in O(n) running time
+    where n is the size of the input list of numbers.
+    """
+    window = collections.deque()
+    window_sum = 0
+    for value in numbers:
+        window.append(value)
+        window_sum += value
+        while window_sum > target:
+            window_sum -= window.popleft()
+        if len(window) >= 2 and window_sum == target:
+            return min(window) + max(window)
     raise RuntimeError('cannot find a candidate')
-
-
-def generate_sums_of_pairs(numbers: list[int]) -> Iterator[int]:
-    for x, y in itertools.combinations(numbers, r=2):
-        yield x + y
 
 
 def read_input_files(input_file: str) -> list[int]:
