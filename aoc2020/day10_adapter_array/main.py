@@ -39,6 +39,11 @@ def count_valid_jolt_chains(adapters: list[int], gap: int) -> int:
     Count the number of configurations of functioning jolt chains
     from the charging outlet (0) to the built-in adapter
     (where two consecutive power devices must be within the given gap).
+
+    This function implements a dynamic programming algorithm with O(nk) running time
+    where n is the number of adapters and k is the input gap size.
+    An improved version of this algorithm using O(n) time (not implemented here)
+    is to maintain a sliding window of preceding config counts plus their total sum.
     """
     builtin_adapter = max(adapters) + gap
     jolt_chain = itertools.chain([0], sorted(adapters), [builtin_adapter])
