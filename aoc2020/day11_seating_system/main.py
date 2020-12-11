@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Literal, Optional
 
 TraceMode = Literal['adjacent', 'visible']
+GRADIENTS = [(-1, 1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
 
 def main():
@@ -27,6 +28,10 @@ def main():
 
 
 def repeat_until_stable(seatmap: SeatMap, trace: TraceMode) -> SeatMap:
+    """
+    Repeatedly compute the next state of the seatmap
+    until it converges to a stationery state.
+    """
     for _ in itertools.count(start=1):
         prev_seatmap, seatmap = seatmap, seatmap.next_round(trace)
         if seatmap == prev_seatmap:
@@ -98,32 +103,39 @@ class SeatMap:
         for r in range(self.row_size):
             for c in range(self.col_size):
                 traced_seats = [
-                    trace_func(r, c, dr, dc)
-                    for dr in [-1, 0, +1]
-                    for dc in [-1, 0, +1]
+                    trace_func(r, c, grad_r, grad_c)
+                    for grad_r, grad_c in GRADIENTS
                 ]
                 next_area[r, c] = self.area[r, c].next_state(traced_seats, tolerance)
         return SeatMap(self.row_size, self.col_size, next_area)
 
-    def trace_adjacent(self, center_r: int, center_c: int, diff_r: int, diff_c: int) -> Optional[Seat]:
-        if diff_r == 0 and diff_c == 0:
-            return None
-        r = center_r + diff_r
-        c = center_c + diff_c
+    def trace_adjacent(self, center_r: int, center_c: int, grad_r: int, grad_c: int) -> Optional[Seat]:
+        """
+        Obtains the adjacent seat from the given center location towards the gradient.
+        Returns None if the seat would be out of bounds from the area.
+        """
+        if grad_r == 0 and grad_c == 0:
+            raise ValueError
+        r = center_r + grad_r
+        c = center_c + grad_c
         if 0 <= r < self.row_size and 0 <= c < self.col_size:
             return self.area[r, c]
         return None
 
-    def trace_visible(self, center_r: int, center_c: int, diff_r: int, diff_c: int) -> Optional[Seat]:
-        if diff_r == 0 and diff_c == 0:
-            return None
-        r = center_r + diff_r
-        c = center_c + diff_c
+    def trace_visible(self, center_r: int, center_c: int, grad_r: int, grad_c: int) -> Optional[Seat]:
+        """
+        Obtains the visible seat from the given center location towards the gradient.
+        Returns None if neither EMPTY nor OCCUPIED seats are found.
+        """
+        if grad_r == 0 and grad_c == 0:
+            raise ValueError
+        r = center_r + grad_r
+        c = center_c + grad_c
         while 0 <= r < self.row_size and 0 <= c < self.col_size:
             if self.area[r, c] in (Seat.EMPTY, Seat.OCCUPIED):
                 return self.area[r, c]
-            r += diff_r
-            c += diff_c
+            r += grad_r
+            c += grad_c
         return None
 
 
@@ -132,7 +144,7 @@ def read_input_files(input_file: str) -> SeatMap:
     Extracts a seating map.
     """
     with open(input_file) as input_fobj:
-        area = [[Seat(char) for char in line.strip()] for line in input_fobj]
+        area = [line.strip() for line in input_fobj]
     return SeatMap.from_raw_area(area)
 
 
