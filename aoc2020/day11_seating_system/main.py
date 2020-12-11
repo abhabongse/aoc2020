@@ -43,7 +43,7 @@ class Seat(enum.Enum):
     EMPTY = 'L'
     OCCUPIED = '#'
 
-    def next_state(self, traced_seats: Sequence[Seat], tolerance: int) -> Seat:
+    def next_state(self, traced_seats: Sequence[Optional[Seat]], tolerance: int) -> Seat:
         """
         Compute the next seat state according to the following rules:
         - If a seat is EMPTY and there are no OCCUPIED seats in trace seats,
