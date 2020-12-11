@@ -17,23 +17,23 @@ def main():
     seatmap = read_input_files(input_file)
 
     # Part 1
-    stable_seatmap_by_adjacency = repeat_until_stable(seatmap, trace='adjacent')
+    stable_seatmap_by_adjacency = repeat_until_stable(seatmap, trace='adjacent', tolerance=4)
     p1_answer = sum(s == Seat.OCCUPIED for s in stable_seatmap_by_adjacency.area.values())
     print(p1_answer)
 
     # Part 2
-    stable_seatmap_by_visibility = repeat_until_stable(seatmap, trace='visible')
+    stable_seatmap_by_visibility = repeat_until_stable(seatmap, trace='visible', tolerance=5)
     p2_answer = sum(s == Seat.OCCUPIED for s in stable_seatmap_by_visibility.area.values())
     print(p2_answer)
 
 
-def repeat_until_stable(seatmap: SeatMap, trace: TraceMode) -> SeatMap:
+def repeat_until_stable(seatmap: SeatMap, trace: TraceMode, tolerance: int) -> SeatMap:
     """
     Repeatedly compute the next state of the seatmap
     until it converges to a stationery state.
     """
     for _ in itertools.count(start=1):
-        prev_seatmap, seatmap = seatmap, seatmap.next_round(trace)
+        prev_seatmap, seatmap = seatmap, seatmap.next_round(trace, tolerance)
         if seatmap == prev_seatmap:
             return seatmap
 
@@ -86,16 +86,14 @@ class SeatMap:
         }
         return SeatMap(row_size, col_size, area)
 
-    def next_round(self, trace: TraceMode) -> SeatMap:
+    def next_round(self, trace: TraceMode, tolerance: int) -> SeatMap:
         """
         Obtains the next seatmap state.
         """
         if trace == 'adjacent':
             trace_func = self.trace_adjacent
-            tolerance = 4
         elif trace == 'visible':
             trace_func = self.trace_visible
-            tolerance = 5
         else:
             raise RuntimeError(f"unknown trace mode {trace!r}")
 
