@@ -56,10 +56,7 @@ def earliest_contest_event(buses: Buses) -> int:
         power = max(largest_power_factor(q, prime) for q, _ in prelim_qr_pairs)
         if power == 1:
             continue
-        remainder = next(
-            r % power for q, r in prelim_qr_pairs
-            if q % power == 0
-        )
+        remainder = next(r % power for q, r in prelim_qr_pairs if q % power == 0)
         qr_pairs.append((power, remainder))
 
     return chinese_remainder(qr_pairs)
@@ -82,7 +79,7 @@ def largest_power_factor(value: int, base: int) -> int:
         value //= base
 
 
-def chinese_remainder(qr_pairs: list[tuple[int, int]]):
+def chinese_remainder(qr_pairs: list[tuple[int, int]]) -> int:
     prod = math.prod(q for q, _ in qr_pairs)
     result = sum(
         r * pow(prod // q, -1, q) * (prod // q)
