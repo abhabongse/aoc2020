@@ -115,7 +115,7 @@ class BaseOp:
 
 @dataclass
 class MaskOp(BaseOp):
-    pattern = re.compile(r'mask = (?P<content>[X01]{36})')
+    pattern = re.compile(r'mask = (?P<content>[01X]{36})')
     content: str
 
 
