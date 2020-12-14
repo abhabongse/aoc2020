@@ -34,27 +34,28 @@ class Program:
     """
     write_op_method: Literal['write_v1', 'write_v2']
     memory: dict[int, int] = field(default_factory=dict)
-    curr_mask: MaskOp = None
+    mask: MaskOp = None
 
     def execute(self, op: BaseOp):
         """
         Executes the program based on the given base operation.
         """
         if isinstance(op, MaskOp):
-            self.curr_mask = op
+            self.mask = op
         elif isinstance(op, WriteOp):
             getattr(self, self.write_op_method)(op)
         else:
             raise RuntimeError
 
     def write_v1(self, write_op: WriteOp):
-        bitmask = int(''.join('1' if b != 'X' else '0' for b in self.curr_mask.content), 2)
-        content = int(''.join('1' if b == '1' else '0' for b in self.curr_mask.content), 2)
-        self.memory[write_op.addr] = self.ternary_masking(bitmask, then_val=content, else_val=write_op.value)
+        bitmask = int(self.mask.content.translate(str.maketrans('01X', '110')), base=2)
+        content = int(self.mask.content.translate(str.maketrans('01X', '010')), base=2)
+        merged_value = self.ternary_masking(bitmask, then_val=content, else_val=write_op.value)
+        self.memory[write_op.addr] = merged_value
 
     def write_v2(self, write_op: WriteOp):
-        bitmask = int(''.join('1' if b != '0' else '0' for b in self.curr_mask.content), 2)
-        for dyn_addr in self.generate_combinations(self.curr_mask.content):
+        bitmask = int(self.mask.content.translate(str.maketrans('01X', '011')), base=2)
+        for dyn_addr in self.generate_combinations(self.mask.content):
             addr = self.ternary_masking(bitmask, then_val=dyn_addr, else_val=write_op.addr)
             self.memory[addr] = write_op.value
 
