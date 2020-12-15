@@ -4,7 +4,7 @@ import os
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import ClassVar, Literal, Pattern, get_type_hints
+from typing import ClassVar, Literal, get_type_hints
 
 
 def main():
@@ -88,7 +88,7 @@ class BaseOp:
     Base class for all operations in the docking program.
     """
     subclasses: ClassVar[list[type[BaseOp]]] = []
-    pattern: ClassVar[Pattern[str]]
+    pattern: ClassVar[re.Pattern[str]]
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
