@@ -4,7 +4,7 @@ import math
 import os
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TypeVar, cast
 
 import more_itertools
 
@@ -90,7 +90,7 @@ def resolve_attributes(rules: list[Rule], tickets: list[Ticket]) -> list[int]:
         matched_columns[index] = col
 
     assert all(isinstance(mc, int) for mc in matched_columns)
-    return matched_columns  # noqa
+    return cast(list[int], matched_columns)
 
 
 def find_with_index(iterable: Iterable[T], pred: Callable[[T], bool]) -> tuple[int, T]:
