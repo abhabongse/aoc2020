@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import functools
+import itertools
 import os
-from collections.abc import Iterator
-from typing import Literal, NamedTuple
+from collections.abc import Iterator, Set
 
+import more_itertools
 
-# TODO: Refactor multi-dimensional into one coherent function
+IntTuple = tuple[int, ...]
+
 
 def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,147 +16,64 @@ def main():
     initial_pocket = read_input_files(input_file)
 
     # Part 1
-    result_pocket = functools.reduce(lambda p, _: expand_once(p), range(6), initial_pocket)
+    initial_pocket_3d = {c + (0,) for c in initial_pocket}
+    result_pocket = functools.reduce(lambda p, _: expand_once(p), range(6), initial_pocket_3d)
     p1_answer = len(result_pocket)
     print(p1_answer)
 
     # Part 2
-    initial_pocket_4d = set(Point4D(c.x, c.y, c.z, 0) for c in initial_pocket)
-    result_pocket_4d = functools.reduce(lambda p, _: expand_once_4d(p), range(6), initial_pocket_4d)
-    p2_answer = len(result_pocket_4d)
+    initial_pocket_4d = {c + (0, 0) for c in initial_pocket}
+    result_pocket = functools.reduce(lambda p, _: expand_once(p), range(6), initial_pocket_4d)
+    p2_answer = len(result_pocket)
     print(p2_answer)
 
 
-class Point3D(NamedTuple):
-    x: int
-    y: int
-    z: int
-
-
-class Point4D(NamedTuple):
-    x: int
-    y: int
-    z: int
-    w: int
-
-
-class BoundAxis(NamedTuple):
-    lower: int
-    upper: int
-
-    @classmethod
-    def from_previous_pocket(cls, pocket: set[Point3D], axis: Literal['x', 'y', 'z']) -> BoundAxis:
-        return BoundAxis(
-            lower=min(getattr(c, axis) for c in pocket) - 1,
-            upper=max(getattr(c, axis) for c in pocket) + 1,
-        )
-
-    @classmethod
-    def from_previous_pocket_4d(cls, pocket: set[Point4D], axis: Literal['x', 'y', 'z', 'w']) -> BoundAxis:
-        return BoundAxis(
-            lower=min(getattr(c, axis) for c in pocket) - 1,
-            upper=max(getattr(c, axis) for c in pocket) + 1,
-        )
-
-
-def expand_once(pocket: set[Point3D]) -> set[Point3D]:
+def expand_once(pocket: Set[IntTuple]) -> set[IntTuple]:
     """
-    Expands the current state of pocket into the next state
-    according to the Conway-style rules.
-    The pocket is a collection of active cube coordinates.
+    Expands the current state of pocket
+    (provided as a collection of active cube coordinates)
+    into the next state according to the Conway-style rules.
     """
-    x_bound = BoundAxis.from_previous_pocket(pocket, 'x')
-    y_bound = BoundAxis.from_previous_pocket(pocket, 'y')
-    z_bound = BoundAxis.from_previous_pocket(pocket, 'z')
-
     next_pocket = set()
-    for coord in generate_coords_within_bounds(x_bound, y_bound, z_bound):
+    for coords in generate_possible_cubes(pocket):
         active_neighbors = sum(
-            nbr_coord in pocket
-            for nbr_coord in generate_neighbors(coord)
+            neighbor_coords in pocket
+            for neighbor_coords in generate_neighbors(coords)
         )
-        if (coord in pocket and active_neighbors in (2, 3)
-                or coord not in pocket and active_neighbors == 3):
-            next_pocket.add(coord)
-
+        if (coords in pocket and active_neighbors in (2, 3)
+                or coords not in pocket and active_neighbors == 3):
+            next_pocket.add(coords)
     return next_pocket
 
 
-def generate_coords_within_bounds(
-        x_bound: BoundAxis,
-        y_bound: BoundAxis,
-        z_bound: BoundAxis,
-) -> Iterator[Point3D]:
-    for z in range(z_bound.lower, z_bound.upper + 1):
-        for y in range(y_bound.lower, y_bound.upper + 1):
-            for x in range(x_bound.lower, x_bound.upper + 1):
-                yield Point3D(x, y, z)
+def generate_possible_cubes(pocket: Set[IntTuple]) -> Iterator[IntTuple]:
+    dim = len(more_itertools.first(pocket))
+    bounds = [
+        range(min(coords[d] for coords in pocket) - 1,
+              max(coords[d] for coords in pocket) + 2)
+        for d in range(dim)
+    ]
+    yield from itertools.product(*bounds)
 
 
-def generate_neighbors(point: Point3D) -> Iterator[Point3D]:
-    shifts = (-1, 0, 1)
-    for dz in shifts:
-        for dy in shifts:
-            for dx in shifts:
-                if dx != 0 or dy != 0 or dz != 0:
-                    yield Point3D(point.x + dx, point.y + dy, point.z + dz)
+def generate_neighbors(coords: IntTuple) -> Iterator[IntTuple]:
+    dim = len(coords)
+    deltas = (-1, 0, 1)
+    for shifts in itertools.product(deltas, repeat=dim):
+        if all(s == 0 for s in shifts):
+            continue
+        shifted_coords = tuple(c + s for c, s in zip(coords, shifts))
+        yield shifted_coords
 
 
-def expand_once_4d(pocket: set[Point4D]) -> set[Point4D]:
-    """
-    Expands the current state of pocket into the next state
-    according to the Conway-style rules.
-    The pocket is a collection of active cube coordinates.
-    """
-    x_bound = BoundAxis.from_previous_pocket_4d(pocket, 'x')
-    y_bound = BoundAxis.from_previous_pocket_4d(pocket, 'y')
-    z_bound = BoundAxis.from_previous_pocket_4d(pocket, 'z')
-    w_bound = BoundAxis.from_previous_pocket_4d(pocket, 'w')
-
-    next_pocket = set()
-    for coord in generate_coords_within_bounds_4d(x_bound, y_bound, z_bound, w_bound):
-        active_neighbors = sum(
-            nbr_coord in pocket
-            for nbr_coord in generate_neighbors_4d(coord)
-        )
-        if (coord in pocket and active_neighbors in (2, 3)
-                or coord not in pocket and active_neighbors == 3):
-            next_pocket.add(coord)
-
-    return next_pocket
-
-
-def generate_coords_within_bounds_4d(
-        x_bound: BoundAxis,
-        y_bound: BoundAxis,
-        z_bound: BoundAxis,
-        w_bound: BoundAxis,
-) -> Iterator[Point4D]:
-    for w in range(w_bound.lower, w_bound.upper + 1):
-        for z in range(z_bound.lower, z_bound.upper + 1):
-            for y in range(y_bound.lower, y_bound.upper + 1):
-                for x in range(x_bound.lower, x_bound.upper + 1):
-                    yield Point4D(x, y, z, w)
-
-
-def generate_neighbors_4d(point: Point4D) -> Iterator[Point4D]:
-    shifts = (-1, 0, 1)
-    for dw in shifts:
-        for dz in shifts:
-            for dy in shifts:
-                for dx in shifts:
-                    if dx != 0 or dy != 0 or dz != 0 or dw != 0:
-                        yield Point4D(point.x + dx, point.y + dy, point.z + dz, point.w + dw)
-
-
-def read_input_files(input_file: str) -> set[Point3D]:
+def read_input_files(input_file: str) -> set[IntTuple]:
     """
     Extracts an initial pocket dimension
     which is a set of active cube 3D coordinates.
     """
     with open(input_file) as input_fobj:
         initial_pocket = {
-            Point3D(x, y, 0)
+            (x, y)
             for y, line in enumerate(input_fobj)
             for x, char in enumerate(line.strip())
             if char == '#'
