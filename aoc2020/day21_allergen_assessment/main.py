@@ -95,7 +95,7 @@ def find_ingredients_may_contain(allergen: Allergen, foods: list[Food]) -> set[I
 
 def read_input_files(input_file: str) -> list[Food]:
     """
-    Extracts a list of expressions.
+    Extracts a list of food ingredients and known allergens.
     """
     with open(input_file) as input_fobj:
         foods = [Food.from_raw(line.strip()) for line in input_fobj]

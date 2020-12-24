@@ -212,7 +212,7 @@ def count_sea_monster_pixels(area: Sequence[str]) -> int:
 
 def read_input_files(input_file: str) -> dict[int, Tile]:
     """
-    Extracts a list of expressions.
+    Extracts a dictionary mapping of input tile numbers to actual tiles.
     """
     with open(input_file) as input_fobj:
         tiles = {

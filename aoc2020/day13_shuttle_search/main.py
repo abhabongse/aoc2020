@@ -90,7 +90,7 @@ def chinese_remainder(qr_pairs: list[tuple[int, int]]) -> int:
 
 def read_input_files(input_file: str) -> tuple[int, Buses]:
     """
-    Extracts an earliest bus boarding time and a list of bus numbers.bus_number
+    Extracts an earliest bus boarding time and a list of bus numbers.
     Bus entry with 'x' will be returned as None.
     """
     with open(input_file) as input_fobj:

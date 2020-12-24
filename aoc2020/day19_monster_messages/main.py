@@ -62,7 +62,7 @@ def replace_rule(rules: list[str], new_rule: str) -> list[str]:
 
 def read_input_files(input_file: str) -> tuple[list[str], list[str]]:
     """
-    Extracts a list of expressions.
+    Extracts a grammar list.
     """
     with open(input_file) as input_fobj:
         rules, messages = more_itertools.split_at(input_fobj, lambda line: not line.strip())
