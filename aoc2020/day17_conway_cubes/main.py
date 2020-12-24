@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import collections
 import functools
 import itertools
 import os
 from collections.abc import Iterator, Set
-
-import more_itertools
 
 IntTuple = tuple[int, ...]
 
@@ -28,32 +27,22 @@ def main():
     print(p2_answer)
 
 
-def expand_once(pocket: Set[IntTuple]) -> set[IntTuple]:
+def expand_once(pocket: Set[IntTuple]) -> frozenset[IntTuple]:
     """
     Expands the current state of pocket
     (provided as a collection of active cube coordinates)
     into the next state according to the Conway-style rules.
     """
-    next_pocket = set()
-    for coords in generate_possible_cubes(pocket):
-        active_neighbors = sum(
-            neighbor_coords in pocket
-            for neighbor_coords in generate_neighbors(coords)
-        )
-        if (coords in pocket and active_neighbors in (2, 3)
-                or coords not in pocket and active_neighbors == 3):
-            next_pocket.add(coords)
+    active_neighbor_counts = collections.Counter(
+        neighbor_coords
+        for coords in pocket
+        for neighbor_coords in generate_neighbors(coords)
+    )
+    next_pocket = frozenset(
+        coords for coords, count in active_neighbor_counts.items()
+        if coords in pocket and count == 2 or count == 3
+    )
     return next_pocket
-
-
-def generate_possible_cubes(pocket: Set[IntTuple]) -> Iterator[IntTuple]:
-    dim = len(more_itertools.first(pocket))
-    bounds = [
-        range(min(coords[d] for coords in pocket) - 1,
-              max(coords[d] for coords in pocket) + 2)
-        for d in range(dim)
-    ]
-    yield from itertools.product(*bounds)
 
 
 def generate_neighbors(coords: IntTuple) -> Iterator[IntTuple]:
@@ -66,19 +55,19 @@ def generate_neighbors(coords: IntTuple) -> Iterator[IntTuple]:
         yield shifted_coords
 
 
-def read_input_files(input_file: str) -> set[IntTuple]:
+def read_input_files(input_file: str) -> frozenset[IntTuple]:
     """
     Extracts an initial pocket dimension
     which is a set of active cube 3D coordinates.
     """
     with open(input_file) as input_fobj:
-        initial_pocket = {
+        pocket = frozenset(
             (x, y)
             for y, line in enumerate(input_fobj)
             for x, char in enumerate(line.strip())
             if char == '#'
-        }
-    return initial_pocket
+        )
+    return pocket
 
 
 if __name__ == '__main__':
