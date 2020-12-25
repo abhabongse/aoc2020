@@ -9,10 +9,10 @@
 #############################
 
 # List of written python packages
-PYTHON_PROJECT_PACKAGES := aoc2020
+PYTHON_PROJECT_PACKAGES := mysolution
 
 # Locations to all requirement files that requires pinning down
-REQUIREMENTS_FILES := $(patsubst ./%.in,%.txt,$(shell find . -type f -name '*.in'))
+REQUIREMENTS_FILES := $(patsubst ./%.in,%.txt,$(shell find . -type f -name '*requirements.in'))
 
 ##########
 ## RECIPES
