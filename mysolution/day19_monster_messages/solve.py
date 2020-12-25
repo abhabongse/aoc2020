@@ -6,7 +6,7 @@ import re
 import more_itertools
 from lark import Lark, LarkError
 
-int_re = re.compile(r'(\d+)')
+INT_RE = re.compile(r'(\d+)')
 
 GRAMMAR_TEMPLATE = """
 {body}
@@ -46,7 +46,7 @@ def validate(text: str, parser: Lark) -> bool:
 
 
 def build_parser(rules: list[str], start: int) -> Lark:
-    grammar = '\n'.join(int_re.sub(r'rule\1', r) for r in rules)
+    grammar = '\n'.join(INT_RE.sub(r'rule\1', r) for r in rules)
     parser = Lark(grammar, start=f'rule{start}', parser='earley')
     return parser
 

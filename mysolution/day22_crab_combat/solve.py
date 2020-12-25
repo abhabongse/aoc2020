@@ -8,7 +8,7 @@ from typing import NamedTuple
 
 import more_itertools
 
-player_name_re = re.compile(r'(.*):')
+PLAYER_NAME_RE = re.compile(r'(.*):')
 
 
 def main():
@@ -33,7 +33,7 @@ class DeckInfo(NamedTuple):
 
     @classmethod
     def from_raw(cls, raw: list[str]) -> DeckInfo:
-        player_name = player_name_re.fullmatch(raw[0].strip()).group(1)
+        player_name = PLAYER_NAME_RE.fullmatch(raw[0].strip()).group(1)
         deck = tuple(int(line) for line in raw[1:])
         return DeckInfo(player_name, deck)
 

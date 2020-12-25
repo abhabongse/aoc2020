@@ -7,7 +7,7 @@ import re
 from collections.abc import Sequence, Set
 from typing import NamedTuple
 
-direction_re = re.compile(r'e|se|sw|w|nw|ne')
+DIRECTION_RE = re.compile(r'e|se|sw|w|nw|ne')
 
 
 def main():
@@ -34,7 +34,7 @@ class Vec(NamedTuple):
         return Vec(self.x + other.x, self.y + other.y)
 
 
-directional_moves = {
+DIRECTIONAL_STEPS = {
     'e': Vec(1, 0),
     'se': Vec(1, -1),
     'sw': Vec(0, -1),
@@ -54,7 +54,7 @@ def flip_board(board: Set[Vec]) -> frozenset[Vec]:
     neighbor_counts = collections.Counter(
         tile + move
         for tile in board
-        for move in directional_moves.values()
+        for move in DIRECTIONAL_STEPS.values()
     )
     next_board = frozenset(
         tile for tile, count in neighbor_counts.items()
@@ -64,7 +64,7 @@ def flip_board(board: Set[Vec]) -> frozenset[Vec]:
 
 
 def displacement(navigation: Sequence[str]) -> Vec:
-    final_pos = sum((directional_moves[d] for d in navigation), start=Vec(0, 0))
+    final_pos = sum((DIRECTIONAL_STEPS[d] for d in navigation), start=Vec(0, 0))
     return final_pos
 
 
@@ -74,7 +74,7 @@ def read_input_files(input_file: str) -> list[list[str]]:
     where each navigation is a list of 6-way cardinal directions.
     """
     with open(input_file) as input_fobj:
-        navigations = [direction_re.findall(line.strip()) for line in input_fobj]
+        navigations = [DIRECTION_RE.findall(line.strip()) for line in input_fobj]
     return navigations
 
 

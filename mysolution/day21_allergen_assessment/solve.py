@@ -11,11 +11,11 @@ from typing import NewType
 Ingredient = NewType('Ingredient', str)
 Allergen = NewType('Allergen', str)
 
-recipe_re = re.compile(
+RECIPE_RE = re.compile(
     r'(?P<ingredients>\w+(?: \w+)*) '
     r'\(contains (?P<allergens>\w+(?:, \w+)*)\)',
 )
-split_re = re.compile(r'\W+')
+SPLIT_RE = re.compile(r'\W+')
 
 
 def main():
@@ -45,9 +45,9 @@ class Food:
 
     @classmethod
     def from_raw(cls, raw: str) -> Food:
-        matchobj = recipe_re.fullmatch(raw)
-        ingredients = {Ingredient(i) for i in split_re.split(matchobj['ingredients'])}
-        allergens = {Allergen(a) for a in split_re.split(matchobj['allergens'])}
+        matchobj = RECIPE_RE.fullmatch(raw)
+        ingredients = {Ingredient(i) for i in SPLIT_RE.split(matchobj['ingredients'])}
+        allergens = {Allergen(a) for a in SPLIT_RE.split(matchobj['allergens'])}
         return Food(ingredients, allergens)
 
 

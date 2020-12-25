@@ -11,7 +11,7 @@ import more_itertools
 
 Arrangement = tuple['Vec', 'Tile']
 
-head_re = re.compile(r'Tile (?P<id>\d+):')
+HEAD_RE = re.compile(r'Tile (?P<id>\d+):')
 
 
 def main():
@@ -223,7 +223,7 @@ def read_input_files(input_file: str) -> dict[int, Tile]:
 
 
 def parse_raw_head(raw_head: str) -> int:
-    return int(head_re.fullmatch(raw_head).group('id'))
+    return int(HEAD_RE.fullmatch(raw_head).group('id'))
 
 
 if __name__ == '__main__':
